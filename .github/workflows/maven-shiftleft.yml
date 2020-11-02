@@ -1,0 +1,34 @@
+# This workflow will build a package using Maven and then publish it to GitHub packages when a release is created
+# For more information see: https://github.com/actions/setup-java#apache-maven-with-a-settings-path
+
+name: Maven Shiftleft
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+        server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
+        settings-path: ${{ github.workspace }} # location for the settings.xml file
+
+    - name: Build with Maven 
+      run: mvn -B package --file pom.xml 
+
+    - name: download shiftleft
+      run: curl https://cdn.shiftleft.io/downloads/sl > /tmp/sl ; chmod +x /tmp/sl 
+    
+    - name: analyze 
+      env: 
+        SHIFTLEFT_ACCESS_TOKEN: eyJhbGciOiJSUzUxMiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MDMyNzg1ODAsImlzcyI6IlNoaWZ0TGVmdCIsIm9yZ0lEIjoiMTlhMzlmZDUtOWQwMi00NjQ3LWFmMTAtYWYwYzk4NzVmYTM2IiwidXNlcklEIjoiNTAyMWI3MTctZGM3Yi00M2RlLTg1M2UtNmM1YWZhNWQ2ZjczIiwic2NvcGVzIjpbInNlYXRzOndyaXRlIiwiZXh0ZW5kZWQiLCJhcGk6djIiLCJ1cGxvYWRzOndyaXRlIiwibG9nOndyaXRlIiwicGlwZWxpbmVzdGF0dXM6cmVhZCIsIm1ldHJpY3M6d3JpdGUiLCJwb2xpY2llczpjdXN0b21lciJdfQ.ebxfZXVWaOHn5O1hxub6hY5Z2KskCNZNcq5uhEckFnxhGdpft9tMzNWTIU4qljSWDElwiLw1jVJaTyJJR5wYcHblTCP2xZZkzLAX32JUpSsly2QeyewF-DZ8gvdj7DM8qlhHUuFrSA8S0jbD6Tx7ioDe-jYZnx5GGYYmks5Cn7zqJ8O40EjGvFieDaU0qUxeCv2bNt3j4BAG6vu-jVqQ0-wlSt4jqC7ZwoZN9HOTWRpLAoyXlgerW0QYNZE-fQwfd34LZ9_re4jGkWLrwoIZwsYJUes-ZVsZ_7ziDcw_nBJIo9l0OQW4yCvKZgBKKrcJoK0VZOg70F37kvf9QG-oDg
+      run: /tmp/sl analyze --wait --app log4j --java log4j.jar
+ 
